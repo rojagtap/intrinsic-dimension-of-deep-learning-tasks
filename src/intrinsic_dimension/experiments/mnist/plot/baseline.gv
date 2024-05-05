@@ -1,0 +1,109 @@
+digraph {
+	graph [size="12,12"]
+	node [align=left fontname=monospace fontsize=10 height=0.2 ranksep=0.1 shape=box style=filled]
+	5763694736 [label="
+ ()" fillcolor=darkolivegreen1]
+	5765884768 -> 5761254160 [dir=none]
+	5761254160 [label="self
+ (128, 10)" fillcolor=orange]
+	5765884768 -> 5203389760 [dir=none]
+	5203389760 [label="target
+ (128)" fillcolor=orange]
+	5765884768 -> 5765661296 [dir=none]
+	5765661296 [label="total_weight
+ ()" fillcolor=orange]
+	5765884768 [label="NllLossBackward0
+----------------------------------
+ignore_index: 18446744073709551516
+reduction   :                    1
+self        :       [saved tensor]
+target      :       [saved tensor]
+total_weight:       [saved tensor]
+weight      :                 None"]
+	5765886976 -> 5765884768
+	5765886976 -> 5765673856 [dir=none]
+	5765673856 [label="result
+ (128, 10)" fillcolor=orange]
+	5765886976 [label="LogSoftmaxBackward0
+----------------------
+dim   :              1
+result: [saved tensor]"]
+	5765886928 -> 5765886976
+	5765886928 -> 5203427792 [dir=none]
+	5203427792 [label="input
+ (128, 200)" fillcolor=orange]
+	5765886928 -> 5203389600 [dir=none]
+	5203389600 [label="weight
+ (10, 200)" fillcolor=orange]
+	5765886928 [label="LinearBackward0
+----------------------
+input : [saved tensor]
+weight: [saved tensor]"]
+	5765887792 -> 5765886928
+	5765887792 -> 5765669056 [dir=none]
+	5765669056 [label="result
+ (128, 200)" fillcolor=orange]
+	5765887792 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	5765887840 -> 5765887792
+	5765887840 -> 5765512496 [dir=none]
+	5765512496 [label="input
+ (128, 200)" fillcolor=orange]
+	5765887840 -> 5203389440 [dir=none]
+	5203389440 [label="weight
+ (200, 200)" fillcolor=orange]
+	5765887840 [label="LinearBackward0
+----------------------
+input : [saved tensor]
+weight: [saved tensor]"]
+	5765887888 -> 5765887840
+	5765887888 -> 5765940144 [dir=none]
+	5765940144 [label="result
+ (128, 200)" fillcolor=orange]
+	5765887888 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	5765888080 -> 5765887888
+	5765888080 -> 5203389680 [dir=none]
+	5203389680 [label="input
+ (128, 784)" fillcolor=orange]
+	5765888080 -> 5763054336 [dir=none]
+	5763054336 [label="weight
+ (200, 784)" fillcolor=orange]
+	5765888080 [label="LinearBackward0
+----------------------
+input : [saved tensor]
+weight: [saved tensor]"]
+	5765888176 -> 5765888080
+	5763054336 [label="linear_relu_stack.linear_input.weight
+ (200, 784)" fillcolor=lightblue]
+	5763054336 -> 5765888176
+	5765888176 [label=AccumulateGrad]
+	5765888128 -> 5765888080
+	4402687456 [label="linear_relu_stack.linear_input.bias
+ (200)" fillcolor=lightblue]
+	4402687456 -> 5765888128
+	5765888128 [label=AccumulateGrad]
+	5765887744 -> 5765887840
+	5203389440 [label="linear_relu_stack.linear_0.weight
+ (200, 200)" fillcolor=lightblue]
+	5203389440 -> 5765887744
+	5765887744 [label=AccumulateGrad]
+	5765887216 -> 5765887840
+	5203389520 [label="linear_relu_stack.linear_0.bias
+ (200)" fillcolor=lightblue]
+	5203389520 -> 5765887216
+	5765887216 [label=AccumulateGrad]
+	5765887600 -> 5765886928
+	5203389600 [label="linear_relu_stack.linear_output.weight
+ (10, 200)" fillcolor=lightblue]
+	5203389600 -> 5765887600
+	5765887600 [label=AccumulateGrad]
+	5765887168 -> 5765886928
+	5203379520 [label="linear_relu_stack.linear_output.bias
+ (10)" fillcolor=lightblue]
+	5203379520 -> 5765887168
+	5765887168 [label=AccumulateGrad]
+	5765884768 -> 5763694736
+}

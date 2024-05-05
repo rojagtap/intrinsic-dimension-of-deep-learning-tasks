@@ -1,14 +1,14 @@
 import torch
 
 
-class LowDimWrapper(torch.nn.Module):
+class VectorSubspaceWrapper(torch.nn.Module):
     """
     wrapper for DimSum where theta_D is not trainable and a vector
     from its subspace is optimized to find the real theta*_D
     """
 
     def __init__(self, model, dint, seed=42):
-        super(LowDimWrapper, self).__init__()
+        super(VectorSubspaceWrapper, self).__init__()
         self.dint = dint
         self.model = model
         self.theta_dint = torch.nn.Parameter(torch.empty(self.dint))

@@ -1,14 +1,14 @@
 """
 implementing the example problem mentioned in the paper
 """
-import os
 import gc
+
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
 
 from ...util.constants import DEVICE
-from ...wrappers.modeling_vector_sum import LowDimWrapper
+from ...util.plotter import plot_results
+from ...wrappers.modeling_vector_sum import VectorSubspaceWrapper
 
 
 class VectorSum(torch.nn.Module):
@@ -71,18 +71,13 @@ def search(model, optimizer, n_sums):
 if __name__ == '__main__':
     D = 1000
     n_sums = 10
-    print(f"Using {DEVICE} device")
-
-    bubble_size = 100
-    fig, ax = plt.subplots()
+    print(f"Using {DEVICE}")
 
     seed = np.random.randint(10e8)
     model = VectorSum(D, seed=seed).to(DEVICE)
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
     epoch, result, score = search(model, optimizer, n_sums)
-    print("Base: Vector after epoch {}: {} with score: {}".format(epoch, result, score))
-
-    ax.axhline(y=score, linestyle='--', color='black', linewidth=1)
+    print(f"Base: Vector after epoch {epoch}: {result} with score: {score}")
 
     del seed
     del model
@@ -94,12 +89,12 @@ if __name__ == '__main__':
     history = {}
     for dint in range(1, 51):
         seed = np.random.randint(10e8)
-        model = LowDimWrapper(VectorSum(D, seed=seed).to(DEVICE), dint, seed=seed).to(DEVICE)
+        model = VectorSubspaceWrapper(VectorSum(D, seed=seed).to(DEVICE), dint, seed=seed).to(DEVICE)
 
         optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
         epoch, result, history[dint] = search(model, optimizer, n_sums)
 
-        print("Vector after epoch {}: {} for intrinsic dim: {} with score: {}".format(epoch, result, dint, history[dint]))
+        print(f"Vector after epoch {epoch}: {result} for intrinsic dim: {dint} with score: {history[dint]}")
 
         del seed
         del model
@@ -108,15 +103,12 @@ if __name__ == '__main__':
         del optimizer
         gc.collect()
 
-    ax.scatter(history.keys(), history.values(), s=bubble_size, alpha=0.5, edgecolors='black', color='navy')
-    ax.plot(history.keys(), history.values(), linestyle='-', color='navy', linewidth=1)
-
-    ax.set_xlabel('d_intrinsic_dim')
-    ax.set_ylabel('Performance (exp(-loss))')
-
-    basedir = "intrinsic_dimension/experiments/example"
-    # Show plot
-    if not os.path.exists(os.path.join(basedir, "plot")):
-        os.mkdir(os.path.join(basedir, "plot"))
-
-    plt.savefig(os.path.join(basedir, "plot/vector-sum-{}D.png".format(D)))
+    plot_results(
+        baseline=score,
+        dints=history.keys(),
+        performance=history.values(),
+        basedir="intrinsic_dimension/experiments/example",
+        name=f"vector-sum-{D}D",
+        xlabel="d",
+        ylabel="performance (exp(-loss))"
+    )
