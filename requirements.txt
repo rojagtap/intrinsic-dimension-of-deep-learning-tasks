@@ -1,5 +1,5 @@
 matplotlib
 numpy
 torch
-torchvision
+torchvision==0.16.1
 torchviz
