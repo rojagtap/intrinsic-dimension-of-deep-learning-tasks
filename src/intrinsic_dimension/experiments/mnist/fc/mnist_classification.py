@@ -1,41 +1,14 @@
 import gc
-from collections import OrderedDict
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from ...util.constants import DEVICE
-from ...util.data import get_dataset
-from ...util.util import set_seed, count_params
-from ...util.plotter import plot_results, plot_model
-from ...wrappers.modeling_fc import SequentialSubspaceWrapper
-
-
-class FC(torch.nn.Module):
-    """
-    as defined in the paper, we train a 786-200-200-10 fc network on the mnist dataset
-    """
-
-    def __init__(self, input_size=(28, 28, 1), hidden_size=200, num_classes=10, n_hidden_layers=1, use_bias=True):
-        super(FC, self).__init__()
-        self.flatten = torch.nn.Flatten()
-
-        layers = OrderedDict([
-            ("linear_input", torch.nn.Linear(np.prod(input_size), hidden_size, bias=use_bias)),
-            ("relu_input", torch.nn.ReLU())
-        ])
-        for i in range(n_hidden_layers):
-            layers[f"linear_{i}"] = torch.nn.Linear(hidden_size, hidden_size, bias=use_bias)
-            layers[f"relu_{i}"] = torch.nn.ReLU()
-        layers["linear_output"] = torch.nn.Linear(hidden_size, num_classes, bias=use_bias)
-
-        self.linear_relu_stack = torch.nn.Sequential(layers)
-
-    def forward(self, x):
-        x = self.flatten(x)
-        logits = self.linear_relu_stack(x)
-        return logits
+from ....util.constants import DEVICE
+from ....util.data import get_dataset
+from ....util.util import set_seed, count_params
+from ....util.plotter import plot_results, plot_model
+from ....wrappers.modeling_fc import SequentialSubspaceWrapper, FC
 
 
 def train(model, optimizer, batch_size, dataset, epochs):
@@ -85,10 +58,11 @@ if __name__ == '__main__':
     lr = 1e-3
     epochs = 3
     batch_size = 128
+    num_classes = 10
     hidden_size = 200
     print(f"Using {DEVICE}")
 
-    basedir = "src/intrinsic_dimension/experiments/mnist"
+    basedir = "src/intrinsic_dimension/experiments/mnist/fc"
 
     train_dataset, test_dataset = get_dataset("mnist")
     sample_images, sample_labels = next(iter(DataLoader(test_dataset, batch_size=batch_size, shuffle=False)))
@@ -96,7 +70,7 @@ if __name__ == '__main__':
 
     # baseline
     set_seed(np.random.randint(10e8))
-    model = FC(hidden_size=hidden_size).to(DEVICE)
+    model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
     total_params = 0
 
     # number of params in base model
@@ -124,7 +98,7 @@ if __name__ == '__main__':
         set_seed(np.random.randint(10e8))
 
         # wrap all linear layers with the subspace layer
-        base_model = FC(hidden_size=hidden_size).to(DEVICE)
+        base_model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
         model = SequentialSubspaceWrapper(base_model=base_model, dint=dint).to(DEVICE)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         train(model, optimizer, batch_size, train_dataset, epochs)
