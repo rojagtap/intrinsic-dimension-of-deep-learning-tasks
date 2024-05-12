@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # lr needs to be lower for training with intrinsic dim as we start with
     # 0 weights and hence objective space needs to be traversed in small steps
-    lr = 1e-4
+    lr = 1e-5
 
     # run for d values from 1 to 1200 with increment of 50
     history = {}
