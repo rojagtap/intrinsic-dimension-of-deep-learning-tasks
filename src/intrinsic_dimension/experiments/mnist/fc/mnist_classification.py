@@ -6,9 +6,10 @@ from torch.utils.data import DataLoader
 
 from ....util.constants import DEVICE
 from ....util.data import get_dataset
-from ....util.util import set_seed, count_params, train, evaluate_accuracy
 from ....util.plotter import plot_results, plot_model
-from ....wrappers.modeling_fc import SequentialSubspaceWrapper, FC
+from ....util.util import set_seed, count_params, train, evaluate_accuracy
+from ....wrappers.modeling_container import SequentialSubspaceWrapper
+from ....wrappers.modeling_fc import FC
 
 
 def accuracy_criterion(logits, labels):
@@ -63,8 +64,8 @@ if __name__ == '__main__':
         set_seed(np.random.randint(10e8))
 
         # wrap all linear layers with the subspace layer
-        base_model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
-        model = SequentialSubspaceWrapper(base_model=base_model, dint=dint).to(DEVICE)
+        model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
+        model.linear_relu_stack = SequentialSubspaceWrapper(base_model=model.linear_relu_stack, dint=dint).to(DEVICE)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         train(model, torch.nn.functional.cross_entropy, optimizer, batch_size, train_dataset, epochs)
         history[dint] = evaluate_accuracy(model, accuracy_criterion, test_dataset, batch_size)
@@ -77,7 +78,6 @@ if __name__ == '__main__':
 
         del model
         del optimizer
-        del base_model
         gc.collect()
 
     plot_results(
