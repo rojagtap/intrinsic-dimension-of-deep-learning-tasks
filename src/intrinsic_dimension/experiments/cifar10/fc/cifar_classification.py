@@ -9,7 +9,7 @@ from ....util.data import get_dataset
 from ....util.plotter import plot_results, plot_model
 from ....util.util import set_seed, count_params, train, evaluate_accuracy
 from ....wrappers.modeling_container import SequentialSubspaceWrapper
-from ....wrappers.modeling_fc import FC
+from ....models.modeling_fc import FC
 
 
 def accuracy_criterion(logits, labels):

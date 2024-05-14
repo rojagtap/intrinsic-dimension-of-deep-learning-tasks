@@ -9,7 +9,8 @@ import torch
 from ...util.util import set_seed
 from ...util.constants import DEVICE
 from ...util.plotter import plot_results
-from ...wrappers.modeling_vector_sum import VectorSubspaceWrapper, VectorSum
+from ...wrappers.modeling_vector import VectorSubspaceWrapper
+from ...models.modeling_vector_sum import VectorSum
 
 
 def apply_constraint(y, n_sums):

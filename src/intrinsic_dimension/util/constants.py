@@ -1,7 +1,7 @@
 import torch
 
 from ..wrappers.modeling_conv import ConvNdSubspaceWrapper
-from ..wrappers.modeling_fc import LinearSubspaceWrapper
+from ..wrappers.modeling_linear import LinearSubspaceWrapper
 
 DEVICE = (
     "cuda"
