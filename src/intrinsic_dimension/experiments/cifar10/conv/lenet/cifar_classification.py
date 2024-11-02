@@ -1,5 +1,6 @@
 import gc
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     sample_images, sample_labels = sample_images.to(DEVICE), sample_labels.to(DEVICE)
 
     # baseline
-    set_seed(1)
+    set_seed(np.random.randint(10e8))
     model = LeNet5(input_size=(32, 32, 3), num_classes=num_classes).to(DEVICE)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     sizes = list(range(1000, 5000, 500))
     sizes.extend([7500, 10001])
     for dint in sizes:
-        set_seed(1)
+        set_seed(np.random.randint(10e8))
 
         # wrap all linear and conv layers with the subspace layer
         model = LeNet5(input_size=(32, 32, 3), num_classes=num_classes).to(DEVICE)
