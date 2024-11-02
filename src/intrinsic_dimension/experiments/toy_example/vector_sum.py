@@ -1,5 +1,5 @@
 """
-implementing the example problem mentioned in the paper
+implementing the toy example problem mentioned in the paper
 """
 import gc
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         baseline=score,
         dints=history.keys(),
         performance=history.values(),
-        basedir="intrinsic_dimension/experiments/example",
+        basedir="intrinsic_dimension/experiments/toy_example",
         name=f"vector-sum-{D}D",
         xlabel="d",
         ylabel="performance (exp(-loss))"

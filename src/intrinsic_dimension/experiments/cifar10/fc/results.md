@@ -7,7 +7,7 @@ Next, we wrap the linear layers with a shared trainable vector of dimension `d` 
 
 Here is a comparison of the model architectures:
 
-| baseline                                          | d = 1000                                               |
+| baseline                                          | d = 9000                                               |
 |---------------------------------------------------|--------------------------------------------------------|
 | ![baseline](./plot/baseline.png "baseline model") | ![subspace](./plot/intrinsic_dim.png "subspace model") |
 
