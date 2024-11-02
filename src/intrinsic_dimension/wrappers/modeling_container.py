@@ -10,17 +10,20 @@ class SequentialSubspaceWrapper(torch.nn.Module):
     """
     wrapper class for torch.nn.Sequential
     """
-    def __init__(self, base_model, dint, layer_map=LAYER_MAP):
+    def __init__(self, base_model, dint, layer_map=LAYER_MAP, theta=None):
         if not isinstance(base_model, torch.nn.Sequential):
             raise ValueError(f"base_model expected to be of the type torch.nn.Sequential, got {type(base_model)}")
 
         super(SequentialSubspaceWrapper, self).__init__()
 
-        self.base_model = base_model
+        if theta is None:
+            # theta is shared across all layers
+            self.theta = torch.nn.Parameter(torch.empty(dint))
+            self.reset_parameters()
+        else:
+            self.theta = theta
 
-        # theta is shared across all layers
-        self.theta = torch.nn.Parameter(torch.empty(dint))
-        self.reset_parameters()
+        self.base_model = base_model
 
         # map layer to the corresponding wrapper layer if present
         layer_map = layer_map if layer_map is not None else {}

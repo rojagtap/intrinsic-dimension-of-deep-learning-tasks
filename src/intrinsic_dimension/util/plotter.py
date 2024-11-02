@@ -1,6 +1,7 @@
 import os
-from torchviz import make_dot
+
 import matplotlib.pyplot as plt
+from torchviz import make_dot
 
 
 def plot_results(baseline, dints, performance, basedir, name, xlabel=None, ylabel=None, title=None, show_dint90=False):

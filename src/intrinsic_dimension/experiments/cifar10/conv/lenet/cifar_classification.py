@@ -1,15 +1,14 @@
 import gc
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from ....models.modeling_fc import FC
-from ....util.constants import DEVICE
-from ....util.data import get_dataset
-from ....util.plotter import plot_results, plot_model
-from ....util.util import set_seed, count_params, train, evaluate_accuracy
-from ....wrappers.modeling_container import SequentialSubspaceWrapper
+from .....models.modeling_convnet import LeNet5
+from .....util.constants import DEVICE
+from .....util.data import get_dataset
+from .....util.plotter import plot_results, plot_model
+from .....util.util import set_seed, count_params, train, evaluate_accuracy
+from .....wrappers.modeling_container import SequentialSubspaceWrapper
 
 
 def accuracy_criterion(logits, labels):
@@ -17,31 +16,27 @@ def accuracy_criterion(logits, labels):
 
 
 if __name__ == '__main__':
-    # sum(input_dim x output_dim + bias)
-    D = (28 * 28 * 1 * 200 + 200) + (200 * 200 + 200) + (200 * 10 + 10)
+    # conv component: (kernel_size ** 2 * in_channels) * out_channels + out_channels (bias)
+    # fc component: input_dim * output_dim + output_dim (bias)
+    D = (3 * 5 * 5 * 6 + 6) + (6 * 5 * 5 * 16 + 16) + (5 * 5 * 16 * 120 + 120) + (120 * 84 + 84) + (84 * 10 + 10)
+    print("Number of parameters: {}".format(D))
 
     # defining hyperparams
     lr = 1e-3
-    epochs = 3
-    batch_size = 128
+    epochs = 10
+    batch_size = 256
     num_classes = 10
-    hidden_size = 200
     print(f"Using {DEVICE}")
 
-    basedir = "src/intrinsic_dimension/experiments/mnist/fc"
+    basedir = "src/intrinsic_dimension/experiments/cifar10/conv/lenet"
 
-    train_dataset, test_dataset = get_dataset("mnist")
+    train_dataset, test_dataset = get_dataset("cifar10")
     sample_images, sample_labels = next(iter(DataLoader(test_dataset, batch_size=batch_size, shuffle=False)))
     sample_images, sample_labels = sample_images.to(DEVICE), sample_labels.to(DEVICE)
 
     # baseline
-    set_seed(np.random.randint(10e8))
-    model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
-
-    # number of params in base model
-    n_params = count_params(model)
-    assert D == n_params
-    print("n_params in base model: ", n_params)
+    set_seed(1)
+    model = LeNet5(input_size=(32, 32, 3), num_classes=num_classes).to(DEVICE)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -56,16 +51,19 @@ if __name__ == '__main__':
 
     # lr needs to be lower for training with intrinsic dim as we start with
     # 0 weights and hence objective space needs to be traversed in small steps
-    lr = 1e-4
+    lr = 5e-5
 
-    # run for d values from 1 to 1200 with increment of 50
+    # run for d values from 1000 to 12001 with increment of 500
     history = {}
-    for dint in range(1, 1201, 50):
-        set_seed(np.random.randint(10e8))
+    sizes = list(range(1000, 5000, 500))
+    sizes.extend([7500, 10001])
+    for dint in sizes:
+        set_seed(1)
 
-        # wrap all linear layers with the subspace layer
-        model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
-        model.linear_relu_stack = SequentialSubspaceWrapper(base_model=model.linear_relu_stack, dint=dint).to(DEVICE)
+        # wrap all linear and conv layers with the subspace layer
+        model = LeNet5(input_size=(32, 32, 3), num_classes=num_classes).to(DEVICE)
+        model.features = SequentialSubspaceWrapper(base_model=model.features, dint=dint).to(DEVICE)
+        model.classifier = SequentialSubspaceWrapper(base_model=model.classifier, dint=dint, theta=model.features.theta).to(DEVICE)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -73,7 +71,7 @@ if __name__ == '__main__':
         history[dint] = evaluate_accuracy(model, accuracy_criterion, test_dataset, batch_size)
         print(f"Accuracy: {history[dint]}, for dint: {dint}")
 
-        if dint - 1 == 1000:
+        if dint == 3000:
             n_params = count_params(model)
             print("n_params in intrinsic model: ", n_params)
             plot_model(model, "intrinsic_dim", basedir, sample_images, torch.nn.functional.cross_entropy, sample_labels)
@@ -87,7 +85,7 @@ if __name__ == '__main__':
         dints=history.keys(),
         performance=history.values(),
         basedir=basedir,
-        name=f"mnist-{D}D",
+        name=f"cifar10-{D}D",
         xlabel="subspace dim d",
         ylabel="validation accuracy",
         show_dint90=True

@@ -7,4 +7,4 @@ class ConvNdSubspaceWrapper(BaseSubspaceWrapper):
 
     def forward(self, x):
         weights, bias = super(ConvNdSubspaceWrapper, self).forward(x)
-        return self.layer._conv_forward(weights, bias)
+        return self.layer._conv_forward(x, weights, bias)

@@ -6,11 +6,11 @@ import gc
 import numpy as np
 import torch
 
-from ...util.util import set_seed
+from ...models.modeling_vector_sum import VectorSum
 from ...util.constants import DEVICE
 from ...util.plotter import plot_results
+from ...util.util import set_seed
 from ...wrappers.modeling_vector import VectorSubspaceWrapper
-from ...models.modeling_vector_sum import VectorSum
 
 
 def apply_constraint(y, n_sums):

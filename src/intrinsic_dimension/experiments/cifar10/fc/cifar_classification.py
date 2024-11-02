@@ -4,12 +4,12 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from ....models.modeling_fc import FC
 from ....util.constants import DEVICE
 from ....util.data import get_dataset
 from ....util.plotter import plot_results, plot_model
 from ....util.util import set_seed, count_params, train, evaluate_accuracy
 from ....wrappers.modeling_container import SequentialSubspaceWrapper
-from ....models.modeling_fc import FC
 
 
 def accuracy_criterion(logits, labels):
@@ -37,7 +37,6 @@ if __name__ == '__main__':
     # baseline
     set_seed(np.random.randint(10e8))
     model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
-    total_params = 0
 
     # number of params in base model
     n_params = count_params(model)
@@ -45,6 +44,7 @@ if __name__ == '__main__':
     print("n_params in base model: ", n_params)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
     train(model, torch.nn.functional.cross_entropy, optimizer, batch_size, train_dataset, epochs)
     baseline_accuracy = evaluate_accuracy(model, accuracy_criterion, train_dataset, batch_size)
     print(f"Baseline Accuracy: {baseline_accuracy}")
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # 0 weights and hence objective space needs to be traversed in small steps
     lr = 1e-5
 
-    # run for d values from 1 to 1200 with increment of 50
+    # run for d values from 1000 to 12001 with increment of 500
     history = {}
     for dint in range(1000, 12001, 500):
         set_seed(np.random.randint(10e8))
@@ -66,7 +66,9 @@ if __name__ == '__main__':
         # wrap all linear layers with the subspace layer
         model = FC(input_size=sample_images.size()[1:], hidden_size=hidden_size, num_classes=num_classes).to(DEVICE)
         model.linear_relu_stack = SequentialSubspaceWrapper(base_model=model.linear_relu_stack, dint=dint).to(DEVICE)
+
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
         train(model, torch.nn.functional.cross_entropy, optimizer, batch_size, train_dataset, epochs)
         history[dint] = evaluate_accuracy(model, accuracy_criterion, test_dataset, batch_size)
         print(f"Accuracy: {history[dint]}, for dint: {dint}")

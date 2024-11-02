@@ -25,6 +25,4 @@ class FC(torch.nn.Module):
         self.linear_relu_stack = torch.nn.Sequential(layers)
 
     def forward(self, x):
-        x = self.flatten(x)
-        logits = self.linear_relu_stack(x)
-        return logits
+        return self.linear_relu_stack(self.flatten(x))
